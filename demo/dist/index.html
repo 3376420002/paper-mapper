@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07121a" />
+  <meta name="description" content="Paper Mapper：用交互式三维地形探索论文的方向、相对前沿位置与研究脉络。" />
+  <title>Paper Mapper · 研究地形图</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Paper Mapper">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div><strong>PAPER MAPPER</strong><small>把论文放回研究地形中</small></div>
+      </div>
+      <div class="topbar-center"><span class="live-dot"></span> 研究领域 <span class="slash">/</span> <strong>大语言模型</strong> <span class="demo-pill">DEMO</span></div>
+      <div class="top-actions"><button id="resetView" class="ghost-button" type="button">重置视角</button><button id="addPaperTop" class="primary-button" type="button"><span>＋</span> 添加论文</button></div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="sidebar-intro"><span class="eyebrow">EXPLORE THE LANDSCAPE</span><h1>研究地形图</h1><p>每座山峰是一个方向的前沿。沿着论文点位，找到工作之间的来路与去向。</p></div>
+        <div class="search-wrap"><span class="search-icon">⌕</span><input id="searchInput" type="search" placeholder="搜索论文或关键词" aria-label="搜索论文或关键词" /><kbd>⌘ K</kbd></div>
+        <div class="section-heading"><span>研究分区</span><small id="regionCount">05 AREAS</small></div>
+        <nav id="regionList" class="region-list" aria-label="研究分区"></nav>
+        <div class="sidebar-bottom"><div class="mini-orbit" aria-hidden="true"><i></i><i></i><i></i></div><div><strong>从迷雾中看见路径</strong><p>选择一个方向，查看论文脉络与未解问题。</p></div></div>
+      </aside>
+
+      <main class="map-column">
+        <div class="map-heading"><div><span class="eyebrow">INTERACTIVE RESEARCH TERRAIN</span><h2>探索领域的山脉</h2><p>拖动旋转 · 滚轮缩放 · 点击论文标点</p></div><div class="map-metrics"><div><strong id="paperMetric">18</strong><span>论文标点</span></div><div><strong id="areaMetric">05</strong><span>研究分区</span></div><div><strong id="frontierMetric">06</strong><span>前沿节点</span></div></div></div>
+        <div class="map-frame" id="mapFrame">
+          <canvas id="terrainCanvas" aria-label="可交互的三维论文地形图"></canvas>
+          <div class="map-overlay top-left"><span class="map-kicker"><span class="live-dot"></span> LANDSCAPE / 01</span><strong>大语言模型研究</strong><small>模拟数据 · 非真实论文</small></div>
+          <div class="map-overlay top-right"><button id="contourToggle" class="map-tool active" type="button" aria-pressed="true" title="显示或隐藏等高线">等高线</button><button id="pathToggle" class="map-tool active" type="button" aria-pressed="true" title="显示或隐藏论文关系">研究路径</button></div>
+          <div id="mapTooltip" class="map-tooltip" role="status"></div>
+          <div class="map-scale"><span>低处 · 基础探索</span><div class="scale-line"><i></i><i></i><i></i><i></i><i></i></div><span>高处 · 相对前沿</span></div>
+          <div class="map-zoom"><button id="zoomIn" type="button" aria-label="放大地图">＋</button><button id="zoomOut" type="button" aria-label="缩小地图">－</button></div>
+          <div class="map-compass"><span>N</span><div class="compass-arrow">↑</div></div>
+        </div>
+        <div class="map-footer"><div class="legend"><span><i class="legend-dot frontier"></i> 相对前沿</span><span><i class="legend-dot foundation"></i> 基础工作</span><span><i class="legend-dot debated"></i> 待验证</span><span><i class="legend-line"></i> 研究承接</span></div><div class="hint">高度表示演示中的相对位置，不等于论文质量评分 <button id="modelInfo" type="button">了解模型 ↗</button></div></div>
+        <div class="timeline"><div class="timeline-head"><span>时间切片</span><strong id="yearLabel">截至 2026 年</strong></div><input id="yearRange" type="range" min="2019" max="2026" value="2026" step="1" aria-label="显示截至某年的论文" /><div class="timeline-years"><span>2019</span><span>2021</span><span>2023</span><span>2026</span></div></div>
+      </main>
+
+      <aside class="insight-panel"><div class="panel-heading"><span class="eyebrow">FIELD NOTES</span><span class="panel-index">01 / 05</span></div><div id="detailContent"></div></aside>
+    </div>
+  </div>
+
+  <dialog id="paperDialog" class="modal"><form id="paperForm" method="dialog"><div class="modal-heading"><div><span class="eyebrow">ADD TO THE MAP</span><h2>放置一篇论文</h2><p>这是前端模拟定位。未来可由论文内容与文献脉络辅助推断。</p></div><button id="closeDialog" class="close-button" type="button" aria-label="关闭">×</button></div><label>论文标题<input name="title" required maxlength="100" placeholder="例如：面向复杂任务的自适应检索框架" /></label><div class="form-grid"><label>研究分区<select name="region" id="regionSelect" required></select></label><label>发表年份<input name="year" type="number" min="2019" max="2026" value="2026" required /></label></div><label>模拟研究进展指数 <output id="scoreOutput">72</output><input name="score" id="scoreInput" type="range" min="15" max="98" value="72" /></label><p class="field-help">标点海拔会按当前时间切片内该分区的最高进展指数重新计算；这不是质量评分。</p><label>一句话贡献<textarea name="contribution" rows="3" maxlength="260" required placeholder="它解决了什么问题？相比前人增加了什么？"></textarea></label><div class="modal-actions"><button id="fillExample" class="ghost-button" type="button">填入示例</button><button class="primary-button" type="submit">在山区标点 <span>↗</span></button></div></form></dialog>
+  <dialog id="infoDialog" class="modal info-modal"><div class="modal-heading"><div><span class="eyebrow">HOW THIS DEMO WORKS</span><h2>这张地形图如何建模？</h2></div><button id="closeInfo" class="close-button" type="button" aria-label="关闭">×</button></div><div class="model-steps"><div><b>01</b><strong>平面位置 = 研究问题</strong><p>相邻区域表示主题相关；一篇论文可以跨分区，正式版本应允许多重归属。</p></div><div><b>02</b><strong>海拔 = 相对前沿位置</strong><p>只在同一问题、同一时间切片内比较。这里用模拟分数摆放标点，不代表真实质量。</p></div><div><b>03</b><strong>路径 = 工作之间的关系</strong><p>连线表示“继承 / 改进 / 验证”。未来需要逐条保留证据和置信度。</p></div><div><b>04</b><strong>迷雾 = 尚未核实的判断</strong><p>真实数据接入后，系统应区分论文原文、引用证据与自动推断。</p></div></div><button id="closeInfoBottom" class="primary-button full" type="button">返回地图</button></dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
