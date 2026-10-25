@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070a10" />
+  <meta name="description" content="Paper Mountain：数据驱动的三维论文山区地图框架。" />
+  <title>Paper Mountain · 论文山区地图</title>
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js"}}
+  </script>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon" aria-hidden="true">⌁</span><span><strong>PAPER MOUNTAIN</strong><small>研究领域地形图 · 框架演示</small></span></div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="搜索论文标题、期刊或研究问题…" aria-label="搜索论文" /><kbd>⌘ K</kbd></label>
+      <div class="top-actions"><button class="quiet-button" id="rotateButton" type="button" aria-pressed="false"><span class="button-icon">↻</span><span class="button-label">自动旋转</span></button><button class="quiet-button" id="resetButton" type="button"><span class="button-icon">⌖</span><span class="button-label">重置视角</span></button><button class="primary-button" id="addButton" type="button">＋ 添加论文</button></div>
+    </header>
+
+    <main class="workspace">
+      <section class="scene-area" aria-label="三维论文山区地图">
+        <div id="scene" class="scene"></div>
+        <div class="scene-vignette" aria-hidden="true"></div>
+        <div class="scene-head"><span class="eyebrow"><i></i> RESEARCH LANDSCAPE / V1.1</span><h1>论文山区地图</h1><p>子领域形成山脉，论文沿着引用关系分布。</p></div>
+        <div id="clusterLabels" class="cluster-labels" aria-hidden="true"></div>
+        <div id="tooltip" class="tooltip" role="status"></div>
+        <div class="legend"><h2>论文状态</h2><div><i class="dot frontier"></i>当前前沿</div><div><i class="dot peak"></i>里程碑主峰</div><div><i class="dot baseline"></i>强基线</div><div><i class="dot legacy"></i>早期 / 已超越</div><h2 class="legend-subtitle">关系连线</h2><div><i class="line outgoing"></i>本文引用了</div><div><i class="line incoming"></i>被其他论文引用</div></div>
+        <div class="scene-hint">左键拖拽旋转 · 滚轮缩放 · 点击标记查看详情与引用关系</div>
+        <div class="scene-loading" id="sceneLoading"><span class="loading-ring"></span><strong>正在生成研究地形</strong><small>加载 Three.js 并计算论文布局…</small></div>
+      </section>
+      <aside class="panel" id="panel" aria-live="polite"></aside>
+    </main>
+  </div>
+
+  <dialog class="modal" id="paperDialog">
+    <form id="paperForm" novalidate>
+      <div class="modal-head"><div><span class="eyebrow">PLACE A PAPER</span><h2>添加论文标记</h2><p>本次演示不会保存数据，刷新页面后恢复占位数据。</p></div><button type="button" id="closeDialog" class="icon-close" aria-label="关闭">×</button></div>
+      <label>论文标题 <span class="required">*</span><input name="title" id="paperTitle" type="text" maxlength="160" placeholder="输入论文标题" /></label>
+      <label>原文链接 / 本地路径 <span class="optional">可选</span><input name="link" type="text" placeholder="https://… 或 /本地/路径.pdf" /></label>
+      <div class="form-grid"><label>所属子领域<select name="cluster" id="clusterSelect"></select></label><label>论文状态<select name="status"><option value="baseline" selected>强基线</option><option value="frontier">当前前沿</option><option value="peak">里程碑主峰</option><option value="legacy">早期 / 已超越</option></select></label></div>
+      <label>海拔 <output id="elevationOutput">65</output><input name="elevation" id="elevationInput" type="range" min="0" max="100" value="65" /></label>
+      <p class="form-note">海拔是待标注的相对前沿程度，不代表论文质量；此表单只演示点位交互。</p>
+      <div class="modal-actions"><button type="button" class="quiet-button" id="cancelDialog">取消</button><button type="submit" class="primary-button">放置到山区 ↗</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="./src/data.js"></script>
+  <script src="./src/terrain.js"></script>
+  <script src="./src/layout.js"></script>
+  <script src="./src/papers.js"></script>
+  <script src="./src/connections.js"></script>
+  <script src="./src/camera.js"></script>
+  <script src="./src/panel.js"></script>
+  <script src="./src/modal.js"></script>
+  <script src="./src/main.js"></script>
+  <script type="module">
+    import('three').then(THREE => window.PM.start(THREE)).catch(error => {
+      console.error('Three.js 加载失败', error);
+      const box = document.getElementById('sceneLoading');
+      box.innerHTML = '<strong>Three.js 加载失败</strong><small>请检查网络连接，或使用本地启动脚本重试。</small>';
+      box.classList.add('error');
+    });
+  </script>
+</body>
+</html>
